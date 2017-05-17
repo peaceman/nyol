@@ -74,7 +74,11 @@ class Scanner
 
             case '"': $this->string(); break;
             default:
-                $this->errorReporter->trackError($this->line, $char, 'Unexpected character.');
+                if ($this->isDigit($char)) {
+                    $this->number();
+                } else {
+                    $this->errorReporter->trackError($this->line, $char, 'Unexpected character.');
+                }
                 break;
         }
     }
@@ -114,7 +118,13 @@ class Scanner
         return $this->source[$this->current];
     }
 
-    protected function string(): void
+    protected function peekNext() : string
+    {
+        if ($this->current + 1 >= strlen($this->source)) return "\0";
+        return $this->source[$this->current + 1];
+    }
+
+    protected function string() : void
     {
         // Advance the current text pointer until we find the closing quote or EOF
         while ($this->peek() !== '"' && !$this->isAtEnd()) {
@@ -134,5 +144,27 @@ class Scanner
         // Extract the token and produce the literal value
         $value = substr($this->source, $this->start + 1, $this->current - $this->start - 2);
         $this->addToken(TT::T_STRING, $value);
+    }
+
+    protected function isDigit(string $char) : bool
+    {
+        return $char >= '0' && $char <= '9';
+    }
+
+    protected function number() : void
+    {
+        // Advance as long as the current character is a digit
+        while ($this->isDigit($this->peek())) $this->advance();
+
+        // Look if we found a fraction (point followed by more digits)
+        if ($this->peek() === '.' && $this->isDigit($this->peekNext())) {
+            // Consume the point
+            $this->advance();
+
+            while ($this->isDigit($this->peek())) $this->advance();
+        }
+
+        $value = substr($this->source, $this->start, $this->current - $this->start);
+        $this->addToken(TT::T_NUMBER, (float)$value);
     }
 }
