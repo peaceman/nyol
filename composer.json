@@ -1,0 +1,7 @@
+{
+    "name": "peaceman/nyol",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {"Nyol\\": "src/"}
+    }
+}
