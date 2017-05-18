@@ -50,4 +50,26 @@ class TokenType
     const T_WHILE = 'while';
 
     const T_EOF = 'eof';
+
+    public static function isReservedKeyword($string) : bool
+    {
+        return in_array($string, [
+            static::T_AND,
+            static::T_CLASS,
+            static::T_ELSE,
+            static::T_FALSE,
+            static::T_FUN,
+            static::T_FOR,
+            static::T_IF,
+            static::T_NIL,
+            static::T_OR,
+            static::T_PRINT,
+            static::T_RETURN,
+            static::T_SUPER,
+            static::T_THIS,
+            static::T_TRUE,
+            static::T_VAR,
+            static::T_WHILE,
+        ]);
+    }
 }

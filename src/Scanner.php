@@ -76,6 +76,8 @@ class Scanner
             default:
                 if ($this->isDigit($char)) {
                     $this->number();
+                } else if ($this->isAlpha($char)) {
+                    $this->identifier();
                 } else {
                     $this->errorReporter->trackError($this->line, $char, 'Unexpected character.');
                 }
@@ -151,6 +153,18 @@ class Scanner
         return $char >= '0' && $char <= '9';
     }
 
+    protected function isAlpha(string $char) : bool
+    {
+        return ($char >= 'a' && $char <= 'z')
+            || ($char >= 'A' && $char <= 'Z')
+            || $char == '_';
+    }
+
+    protected function isAlphaNumeric(string $char) : bool
+    {
+        return $this->isAlpha($char) || $this->isDigit($char);
+    }
+
     protected function number() : void
     {
         // Advance as long as the current character is a digit
@@ -166,5 +180,15 @@ class Scanner
 
         $value = substr($this->source, $this->start, $this->current - $this->start);
         $this->addToken(TT::T_NUMBER, (float)$value);
+    }
+
+    protected function identifier() : void
+    {
+        while ($this->isAlphaNumeric($this->peek())) $this->advance();
+
+        $value = substr($this->source, $this->start, $this->current - $this->start);
+
+        $type = TT::isReservedKeyword($value) ? $value : TT::T_IDENTIFIER;
+        $this->addToken($type);
     }
 }
